@@ -26,3 +26,17 @@ jobs:
           -Dexec.args="install --with-deps ${{ matrix.browser }}"
       - name: Run tests
         run: mvn -B test -Dbrowser=${{ matrix.browser }}
+      - name: Generate Allure report
+        if: always()
+        run: mvn -B io.qameta.allure:allure-maven:2.15.0:report
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.browser }}
+          path: |
+            target/surefire-reports
+            target/allure-results
+            target/site/allure-maven-plugin
+            test-results/screenshots
+          if-no-files-found: ignore

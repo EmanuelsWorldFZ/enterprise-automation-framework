@@ -1,6 +1,8 @@
 package com.saucedemo.utils;
 
 import com.microsoft.playwright.Page;
+import io.qameta.allure.Allure;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,10 +29,11 @@ public class ScreenshotOnFailure implements TestExecutionExceptionHandler {
 
     try {
       Files.createDirectories(outputDirectory);
-      String fileName = context.getDisplayName().replaceAll("[^a-zA-Z0-9.-]", "_");
-      page.screenshot(new Page.ScreenshotOptions()
-          .setPath(outputDirectory.resolve(fileName + ".png"))
-          .setFullPage(true));
+      String fileName = context.getUniqueId().replaceAll("[^a-zA-Z0-9.-]", "_");
+      byte[] screenshot = page.screenshot(new Page.ScreenshotOptions().setFullPage(true));
+      Files.write(outputDirectory.resolve(fileName + ".png"), screenshot);
+      Allure.addAttachment(context.getDisplayName(), "image/png",
+          new ByteArrayInputStream(screenshot), "png");
     } catch (IOException | RuntimeException screenshotFailure) {
       cause.addSuppressed(new RuntimeException(
           "Unable to capture screenshot for " + context.getDisplayName(), screenshotFailure));

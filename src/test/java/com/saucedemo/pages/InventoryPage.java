@@ -4,17 +4,23 @@ import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.AriaRole;
 
-public class InventoryPage {
-  private final Page page;
-
+public class InventoryPage extends BasePage {
   public InventoryPage(Page page) {
-    this.page = page;
+    super(page);
   }
 
   public boolean isDisplayed() {
-    Locator heading = page.getByText("Products", new Page.GetByTextOptions().setExact(true));
+    Locator heading = exactText("Products");
     heading.waitFor();
     return heading.isVisible();
+  }
+
+  public String getProductPrice(String productName) {
+    return product(productName).locator(".inventory_item_price").innerText();
+  }
+
+  public String getProductTitle(String productName) {
+    return product(productName).locator(".inventory_item_name").innerText();
   }
 
   public void addToCart(String productName) {
@@ -24,19 +30,19 @@ public class InventoryPage {
   }
 
   public int getCartCount() {
-    Locator badge = page.getByTestId("shopping-cart-badge");
+    Locator badge = testId("shopping-cart-badge");
     return badge.count() == 0 ? 0 : Integer.parseInt(badge.innerText());
   }
 
   public void openCart() {
-    page.getByTestId("shopping-cart-link").click();
-    page.getByText("Your Cart", new Page.GetByTextOptions().setExact(true)).waitFor();
+    testId("shopping-cart-link").click();
+    exactText("Your Cart").waitFor();
   }
 
   public void logout() {
     page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Open Menu")).click();
-    page.getByTestId("logout-sidebar-link").click();
-    page.getByTestId("login-button").waitFor();
+    testId("logout-sidebar-link").click();
+    testId("login-button").waitFor();
   }
 
   private Locator product(String productName) {
