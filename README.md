@@ -40,8 +40,10 @@ Run the tests:
 mvn test
 ```
 
-Tests run headlessly in Chromium by default. To run them in Firefox or WebKit,
-install those browsers and select one with the `browser` property:
+Tests run headlessly in Chromium by default. The base URL, browser, headless
+mode, and timeout are read from `src/test/resources/config.properties`.
+Override settings without changing files using system properties or environment
+variables. For example, to run in Firefox:
 
 ```sh
 mvn exec:java \
@@ -53,28 +55,60 @@ mvn test -Dbrowser=firefox
 mvn test -Dbrowser=webkit
 ```
 
+Equivalent environment overrides include `PLAYWRIGHT_BROWSER=firefox` and
+`SAUCEDEMO_BASE_URL=https://www.saucedemo.com`. The workflow already runs each
+browser in a separate GitHub Actions matrix job; test classes also run in
+parallel locally (four workers by default).
+
 ## Test coverage
 
-- Successful login, invalid credentials, and logout
+- Data-driven login for standard, problem, performance-glitch, and locked-out
+  users; invalid credentials and logout
 - Product listing and cart badge count
-- Adding and removing products from the cart
-- Required checkout details and successful order confirmation
+- Inventory values checked against JSON product expectations
+- Adding/removing products, and checkout subtotal calculated from cart prices
+- Checkout performed with each row in the CSV customer dataset
+- ReqRes GET users and POST create-user API checks
+- Failure screenshots saved under `test-results/screenshots` and attached to
+  Allure results
 
-The tests use Sauce Demo's public practice credentials: `standard_user` /
-`secret_sauce`.
+The browser tests use Sauce Demo's public practice credentials from the JSON
+dataset. API settings can be overridden with `REQRES_BASE_URL` and
+`REQRES_API_KEY`.
+
+## Reports
+
+Surefire XML/text reports are saved under `target/surefire-reports`. Generate
+the Allure HTML report after a test run with:
+
+```sh
+mvn io.qameta.allure:allure-maven:2.15.0:report
+```
+
+Open `target/site/allure-maven-plugin/index.html`. GitHub Actions uploads
+Surefire reports, Allure results/reports, and screenshots as workflow artifacts
+for every browser.
+
+## Git workflow
+
+Use `main` for stable work, `develop` for integration, and short-lived
+`feature/<topic>` branches for enhancements. Open a pull request from each
+feature branch into `develop`, then promote reviewed releases from `develop` to
+`main`. Keep commits focused and descriptive; this local enhancement is on
+`feature/advanced-framework` and is intentionally left uncommitted so it can be
+committed with your configured Git identity.
 
 ## Project structure
 
 ```text
 src/test/java/com/saucedemo/
 ├── base/       Shared browser setup and teardown
-├── pages/      Login, inventory, cart, and checkout page objects
-├── tests/      Login, cart, and checkout tests
-└── utils/      Screenshot capture on test failures
+├── pages/      Shared base page plus page objects
+├── tests/      UI, API, product, and checkout tests
+└── utils/      Configuration, test data, and failure screenshots
 ```
 
-JUnit reports are saved under `target/surefire-reports`. Screenshots from failed
-tests are saved under `target/test-artifacts/screenshots`.
-
-GitHub Actions runs the test suite on Chromium, Firefox, and WebKit for pushes
-and pull requests.
+Test resources (configuration and JSON/CSV datasets) live under
+`src/test/resources`. GitHub Actions runs the suite on Chromium, Firefox, and
+WebKit for pushes and pull requests, then saves the reports and screenshots as
+artifacts.
