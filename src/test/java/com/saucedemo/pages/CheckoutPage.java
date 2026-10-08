@@ -1,33 +1,37 @@
 package com.saucedemo.pages;
 
 import com.microsoft.playwright.Page;
+import java.math.BigDecimal;
 
-public class CheckoutPage {
-  private final Page page;
-
+public class CheckoutPage extends BasePage {
   public CheckoutPage(Page page) {
-    this.page = page;
+    super(page);
   }
 
   public void enterDetails(String firstName, String lastName, String postalCode) {
-    page.getByTestId("firstName").fill(firstName);
-    page.getByTestId("lastName").fill(lastName);
-    page.getByTestId("postalCode").fill(postalCode);
+    testId("firstName").fill(firstName);
+    testId("lastName").fill(lastName);
+    testId("postalCode").fill(postalCode);
   }
 
   public void continueToOverview() {
-    page.getByTestId("continue").click();
+    testId("continue").click();
   }
 
   public String getErrorMessage() {
-    return page.getByTestId("error").innerText();
+    return testId("error").innerText();
   }
 
   public void finishOrder() {
-    page.getByTestId("finish").click();
+    testId("finish").click();
   }
 
   public String getConfirmationMessage() {
     return page.getByText("Thank you for your order!").innerText();
+  }
+
+  public BigDecimal getSubtotal() {
+    return priceFrom(page.locator(".summary_subtotal_label").innerText()
+        .replaceFirst(".*\\$", ""));
   }
 }

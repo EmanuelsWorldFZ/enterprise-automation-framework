@@ -2,24 +2,22 @@ package com.saucedemo.pages;
 
 import com.microsoft.playwright.Page;
 
-public class LoginPage {
-  private final Page page;
-
+public class LoginPage extends BasePage {
   public LoginPage(Page page) {
-    this.page = page;
+    super(page);
   }
 
   public void open(String baseUrl) {
-    page.navigate(baseUrl);
+    navigateTo(baseUrl);
   }
 
   public void login(String username, String password) {
-    page.getByTestId("username").fill(username);
-    page.getByTestId("password").fill(password);
-    page.getByTestId("login-button").click();
+    testId("username").fill(username);
+    testId("password").fill(password);
+    testId("login-button").click();
   }
 
   public String getErrorMessage() {
-    return page.getByTestId("error").innerText();
+    return testId("error").innerText();
   }
 }
