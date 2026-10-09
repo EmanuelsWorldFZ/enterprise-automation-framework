@@ -3,6 +3,7 @@ package com.saucedemo.pages;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.AriaRole;
+import com.microsoft.playwright.options.WaitForSelectorState;
 
 public class InventoryPage extends BasePage {
   public InventoryPage(Page page) {
@@ -41,7 +42,10 @@ public class InventoryPage extends BasePage {
 
   public void logout() {
     page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Open Menu")).click();
-    testId("logout-sidebar-link").click();
+    Locator logoutLink = testId("logout-sidebar-link");
+    logoutLink.waitFor(
+        new Locator.WaitForOptions().setState(WaitForSelectorState.VISIBLE));
+    logoutLink.click();
     testId("login-button").waitFor();
   }
 
